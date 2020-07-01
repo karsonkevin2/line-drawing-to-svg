@@ -1,4 +1,4 @@
-function [svgDataSimple, svgData] = vectorizeLineSmart(bitmap)
+function [svgDataSimple, svgData, svg] = vectorizeLineSmart(bitmap)
 %Converts a bitmap line drawing into a set of coordinates writeable to svg
 %   
 %   EXAMPLE: 
@@ -28,6 +28,8 @@ svgData = zeros(4,1);
 svgDataSimple = zeros(4,1);
 dataNum = 1;
 dataNum2 = 1;
+entry = 1;
+svg = zeros(1,1);
 
 %search
 for y=1:ySize
@@ -43,7 +45,7 @@ for y=1:ySize
                 end
             end
         end
-            
+        
         %end points
         if adj==1 || 3<=adj
             for asdf=1:adj
@@ -54,7 +56,7 @@ for y=1:ySize
                 firstFlag=true;
                 headingOld = [2,2]; %impossible
                 exFlag = false;
-                
+                connection=1;
                 while ~exFlag
                     exFlag = true;
                     for j=-1:1
@@ -78,6 +80,9 @@ for y=1:ySize
                                         svgDataSimple(:,dataNum2) = [xL;yL;x2;y2];
                                         dataNum2 = dataNum2 + 1;
                                         headingOld = headingNew;
+                                        svg(entry,connection)=xL;
+                                        svg(entry,connection+1)=yL;
+                                        connection = connection+2;
                                         xL = x2;
                                         yL = y2;
                                     end
@@ -100,7 +105,12 @@ for y=1:ySize
                 end                   
                 if ~firstFlag
                     svgDataSimple(:,dataNum2) = [xL;yL;x2;y2];
+                    svg(entry,connection)=xL;
+                    svg(entry,connection+1)=yL;
+                    svg(entry,connection+2)=x2;
+                    svg(entry,connection+3)=y2;
                     dataNum2 = dataNum2 + 1;
+                    entry = entry + 1;
                 end
             end
         end
