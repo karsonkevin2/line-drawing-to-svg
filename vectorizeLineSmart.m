@@ -1,20 +1,17 @@
-%IN-PROGRESS
-%TODO:
-
-
-function [svgData] = vectorizeLineSmart(bitmap)
+function [svgDataSimple, svgData] = vectorizeLineSmart(bitmap)
 %Converts a bitmap line drawing into a set of coordinates writeable to svg
 %   
 %   EXAMPLE: 
-%       svgData = vectorizeLineDense(bitmap);
-%
+%       svgDataSimple = vectorizeLineSmart(bitmap);
+%       [svgDataSimple, svgData] = vectorizeLineSmart(bitmap);
 %   IN: 
 %       bitmap - a 2D logical matrix, i.e. a background of value=0 and
 %           lines of value=1.
 %
 %   OUT: 
-%       svgData - a list of coordinate pairs to draw lines between,
+%       svgDataSimple - a list of simplified coordinate pairs to draw lines between,
 %           formatted to be readable in an svg file
+%       svgData - OPTIONAL - a complete list of coordinate pairs
 %
 %   This function attempts to reduce the number of nodes necessary in the
 %   svg file. Lines drawn in one of the 8 cardinal or intercardinal
@@ -23,73 +20,91 @@ function [svgData] = vectorizeLineSmart(bitmap)
 
 
 bitmap = im2binary(bitmap);
+bitmapPadded = padarray(bitmap,[1,1]);
 
 [ySize, xSize] = size(bitmap);
 
 svgData = zeros(4,1);
+svgDataSimple = zeros(4,1);
 dataNum = 1;
+dataNum2 = 1;
 
-
-for y=2:ySize-1
-    for x=2:xSize-1
-
+%search
+for y=1:ySize
+    for x=1:xSize
         %tally adjancencies
         adj = -1;
         if bitmap(y,x)==1
             for j=-1:1
                 for i=-1:1
-                    if bitmap(y+j,x+i) == 1
+                    if bitmapPadded(y+j+1,x+i+1) == 1
                         adj = adj + 1;
                     end
                 end
             end
         end
-
+            
         %end points
-        if adj==1
-            y2=y;
-            x2=x;
-            exFlag = false;
-            while ~exFlag
-                exFlag = true;
-                for j=-1:1
-                    if(exFlag == false)
-                        break
-                    end
-                    for i=-1:1
-                        dupeFlag = false;
-                        if bitmap(y2+j,x2+i) == 1 && ~isequal([j,i],[0,0])
-                            for gg=1:size(svgData,1)
-                                if isequal(svgData(gg,:),[y2,x2,y2+j,x2+i]) || isequal(svgData(gg,:),[y2+j,x2+i,y2,x2])
-                                    dupeFlag = true;
+        if adj==1 || 3<=adj
+            for asdf=1:adj
+                y2=y;
+                x2=x;
+                xL=x;
+                yL=y;
+                firstFlag=true;
+                headingOld = [2,2]; %impossible
+                exFlag = false;
+                
+                while ~exFlag
+                    exFlag = true;
+                    for j=-1:1
+                        if(exFlag == false)
+                            break
+                        end
+                        for i=-1:1
+                            dupeFlag = false;
+                            if bitmapPadded(y2+j+1,x2+i+1) == 1 && ~isequal([j,i],[0,0])
+                                for n=1:size(svgData,2)
+                                    if isequal(svgData(:,n),[x2;y2;x2+i;y2+j]) || isequal(svgData(:,n),[x2+i;y2+j;x2;y2])
+                                        dupeFlag = true;
+                                        break
+                                    end
+                                end
+
+                                if dupeFlag == false
+                                    headingNew = [i,j];
+                                    
+                                    if ~isequal(headingNew, headingOld) && ~firstFlag
+                                        svgDataSimple(:,dataNum2) = [xL;yL;x2;y2];
+                                        dataNum2 = dataNum2 + 1;
+                                        headingOld = headingNew;
+                                        xL = x2;
+                                        yL = y2;
+                                    end
+
+                                    exFlag = false;
+
+                                    svgData(:,dataNum) = [x2;y2;x2+i;y2+j];
+
+                                    firstFlag = false;
+
+                                    dataNum = dataNum + 1;
+
+                                    y2 = y2 + j;
+                                    x2 = x2 + i;
                                     break
                                 end
                             end
-
-                            if dupeFlag == false
-                                headingNew = [i,j]
-                                doneFlag = false;
-                                exFlag = false;
-
-                                if headingNew ~= headingOld
-                                svgData(:,dataNum) = [x2;y2;x2+j;y2+i];
-
-                                dataNum = dataNum + 1;
-                                %MAKE CONNECTION
-                                if(y2<size(bitmap,1)-1 && 1<y2 && 1<x2 && x2<size(bitmap,2)-1)
-                                    y2 = y2 + j;
-                                    x2 = x2 + i;
-                                end
-                                break
-                            end
                         end
                     end
+                end                   
+                if ~firstFlag
+                    svgDataSimple(:,dataNum2) = [xL;yL;x2;y2];
+                    dataNum2 = dataNum2 + 1;
                 end
             end
-
         end
     end
 end
-     
-end
 
+end
