@@ -29,7 +29,7 @@ function [svgData] = reduceSVG(svgData)
 
 flag = false;
 while flag == false
-    size(svgData,2)
+    size(svgData,2);
     n=1;
     flag = true;
     

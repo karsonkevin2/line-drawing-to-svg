@@ -8,16 +8,16 @@ function [svgData] = vectorizeLineDense(bitmap)
 %   INPUT: 
 %       bitmap - a 2D logical matrix, i.e. a background of value=0 and
 %           lines of value=1. Also accepts colour and greyscale images and
-%           attempts to convert them to binary. Also accepts file names
+%           attempts to convert them to binary. Also accepts file
+%           extensions
 %
 %   OUTPUT: 
 %       svgData - a list of coordinate pairs to draw lines between,
 %           formatted to be readable in an svg file
 %
-%   This works best if the line drawing is exactly 1 pixel thick, if it is 
-%   thicker then rendering will take a very long time. This function will 
-%   examine every pixel and their 8-connected region to
-%   make lines. Each line will one pixel long, no simplification is used.
+%   This function will examine every pixel and their 8-connected region to
+%   make connections. Each line will one pixel long, no simplification is 
+%   used. This will run orders of magnitude faster than vectorizeLineSmart
 
 bitmap = im2binary(bitmap);
 
