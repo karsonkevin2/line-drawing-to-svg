@@ -4,6 +4,8 @@
 
 This MATLAB library provides functionality for 1:1 conversion of line drawings into SVG files. The purpose is for lossless conversion of raster line drawings into vectorized line drawings. The converted files will be identical to the original files and infinitely zoomable. The SVG output is structured using a separate polyline between each joint.
 
+[![View Lossless Line Drawing to SVG Conversion on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/78309-lossless-line-drawing-to-svg-conversion)
+
 ---
 
 ## Table of Contents
