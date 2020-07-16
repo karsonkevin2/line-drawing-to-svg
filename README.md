@@ -36,7 +36,7 @@ printSVGpoly(svgData, im, 'output.svg');
 
 PNG (Original) | SVG (Converted)
 :---: | :---:
-<img src="/exLarge.png" width="500" /> | <img src="/exLargeSVG.svg" width="500" /> 
+<img src="Examples/exLarge.png" width="500" /> | <img src="Examples/exLargeSmart.svg" width="500" /> 
 
 ---
 
