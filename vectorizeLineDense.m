@@ -1,15 +1,13 @@
-function [svgData] = vectorizeLineDense(bitmap)
+function [svgData] = vectorizeLineDense(image)
 %Converts a bitmap line drawing into a set of coordinates writeable to svg
-%   
+%Use in conjuction with printSVG.m
+%
 %   EXAMPLE: 
-%       svgData = vectorizeLineDense(bitmap);
+%       svgData = vectorizeLineDense(image);
 %       svgData = vectorizeLineDense('myfile.png');
 %
 %   INPUT: 
-%       bitmap - a 2D logical matrix, i.e. a background of value=0 and
-%           lines of value=1. Also accepts colour and greyscale images and
-%           attempts to convert them to binary. Also accepts file
-%           extensions
+%       image - an image either as logical, colour, or a file extension
 %
 %   OUTPUT: 
 %       svgData - a list of coordinate pairs to draw lines between,
@@ -17,55 +15,28 @@ function [svgData] = vectorizeLineDense(bitmap)
 %
 %   This function will examine every pixel and their 8-connected region to
 %   make connections. Each line will one pixel long, no simplification is 
-%   used. This will run orders of magnitude faster than vectorizeLineSmart
+%   used.
 
-bitmap = im2binary(bitmap);
+image = im2binary(image);
+bitmapPad = padarray(image,[1,1],0);
 
-[ySize, xSize] = size(bitmap);
+[ySize, xSize] = size(image);
 
 svgData = zeros(4,1);
 dataNum = 1;
 
-%take care of most cases
 for y=1:ySize
-    for x=1:xSize-1
-        if bitmap(y,x)==1
-            if bitmap(y,x+1)==1
-                svgData(:,dataNum) = [x;y;x+1;y];
-                dataNum = dataNum + 1;
-            end
-        end
-    end
-end
-
-for y=1:ySize-1
     for x=1:xSize
-        if bitmap(y,x)==1
-            if bitmap(y+1,x)==1
-                svgData(:,dataNum) = [x;y;x;y+1];
-                dataNum = dataNum + 1;
-            end
-        end
-    end
-end
-
-for y=1:ySize-1
-    for x=1:xSize-1
-        if bitmap(y,x)==1
-            if bitmap(y+1,x+1)==1
-                svgData(:,dataNum) = [x;y;x+1;y+1];
-                dataNum = dataNum + 1;
-            end
-        end
-    end
-end
-
-for y=1:ySize-1
-    for x=2:xSize
-        if bitmap(y,x)==1
-            if bitmap(y+1,x-1)==1
-                svgData(:,dataNum) = [x;y;x-1;y+1];
-                dataNum = dataNum + 1;
+        if image(y,x)==1
+            for j=-1:1
+                for i=-1:1
+                    if bitmapPad(y+j+1,x+i+1) == 1
+                        if ~(j== 0 && i== 0)
+                            svgData(:,dataNum) = [x;y;x+i;y+j];
+                            dataNum = dataNum + 1;
+                        end    
+                    end
+                end
             end
         end
     end

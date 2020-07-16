@@ -2,7 +2,7 @@
 
 ---
 
-This MATLAB library provides functionality for 1:1 conversion of line drawings into SVG files. The purpose is to convert raster line drawings into vectorized line drawings. The converted files will be identical to the original files and infinitely zoomable.
+This MATLAB library provides functionality for 1:1 conversion of line drawings into SVG files. The purpose is for lossless conversion of raster line drawings into vectorized line drawings. The converted files will be identical to the original files and infinitely zoomable. The SVG output is structured using a separate polyline between each joint.
 
 ---
 
@@ -17,16 +17,21 @@ This MATLAB library provides functionality for 1:1 conversion of line drawings i
 
 ## Example
 Read in a raster line drawing, `exLarge.png`
+
 ```MATLAB
 im = imread('exLarge.png');
 ```
+
 Run the function `vectorizeLineSmart.m` on the image to get coordinate lists
+
 ```MATLAB
-svgDataIntermediate = vectorizeLineSmart(im);
+svgData = vectorizeLineSmart(im);
 ```
+
 Run the function `printSVGpoly.m` to print the data to an SVG file
+
 ```MATLAB
-printSVGpoly(svgDataIntermediate, im, 'output.svg');
+printSVGpoly(svgData, im, 'output.svg');
 ```
 
 PNG (Original) | SVG (Converted)
@@ -50,13 +55,15 @@ PNG (Original) | SVG (Converted)
 
 - **How fast are the functions?**
 
-  - The library is currently single-threaded. On an image about 1000x1000 pixels, one can expect the `vectorizeLineSmart.m` function to take upwards of 10-20 seconds. This function's runtime will scale exponentially for images with more lines.
-
-  - Alternatively, the `vectorizeLineDense.m` function can be used which will return the same image, but every pixel will have a connection to adjacent pixels. This will run instantly, but attempting to open the image in a renderer may take time.
+  - On the example, the `exLarge.png` file which is 506x564 pixels and has 3403 edge pixels takes approximately 0.2 seconds to run the `vectorizeLineSmart.m` function. The runtime will be roughly proportional to the dimensions*numPixels. The library is currently single-threaded.
+ 
+  - Alternatively, the `vectorizeLineDense.m` function can be used which will return the same image, but every pixel will have a connection to adjacent pixels. This will take approximately half the time, 0.1 seconds. Attempting to open the image in a renderer will take more time.
 
 - **How is a 1:1 conversion achieved?**
 
   - The `vectorizeLineSmart.m` function looks at any endpoints or joints in the line drawing. It traces a line from these points until it reaches another endpoint or joint. This process is repeated until all connections have been created.
+
+  - Using the `svgDataIntermediate` variable with `printSVGpoly.m` will create a image composed of polylines between the joints. Using the `svgDataSimple` variable with `printSVG.m` will create an image composed of straight line segments in 8-connectivity space. Using the `svgDataDense` variable with `printSVG.m` will create an image composed of pixel connections.
 
 ---
 

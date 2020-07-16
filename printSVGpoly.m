@@ -13,7 +13,11 @@ function printSVGpoly(svgData,bitmap,fileID)
 %
 
 %Add file extension if not present
-if ~isequal(fileID(end-3:end),'.svg')
+if 4 <= length(fileID)
+    if ~isequal(fileID(end-3:end),'.svg')
+        fileID = [fileID, '.svg'];
+    end
+else
     fileID = [fileID, '.svg'];
 end
 

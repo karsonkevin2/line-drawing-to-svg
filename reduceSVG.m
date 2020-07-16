@@ -1,5 +1,5 @@
-%IN-PROGRESS
-%TODO
+%NOT USEFUL
+%IT WILL BE FASTER TO CALL vectorizeLineSmart THAN vectorizeLineDense and then reduceSVG
 
 function [svgData] = reduceSVG(svgData)
 %UNTITLED3 Summary of this function goes here

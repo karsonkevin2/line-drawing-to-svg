@@ -1,17 +1,6 @@
-
-
-%TODO
-%add selection mask. When checking if connection has already been made,
-%instead of seeing if it is already on the connection list, first check to
-%ensure that the pixel even needs to be checked. If a pixel has 2/2
-%connections we could automatically not check the list. If a pixel has n/2
-%then we also would not have to check the list.
-
-%Would need a new adjacency matrix as well as a completion matrix
-
-
 function [svgIntermediate, svgDataSimple, svgDataDense] = vectorizeLineSmart(image)
 %Converts a bitmap line drawing into a set of coordinates writeable to svg
+%Use in conjuction with either printSVGpoly.m or printSVG.m
 %   
 %   EXAMPLE: 
 %       svgIntermediate = vectorizeLineSmart('myimage.png');
@@ -33,7 +22,6 @@ function [svgIntermediate, svgDataSimple, svgDataDense] = vectorizeLineSmart(ima
 %   directions should be calculated as a single line rather than many short
 %   lines
 
-
 image = im2binary(image);
 bitmapPadded = padarray(image,[1,1]);
 
@@ -45,12 +33,14 @@ dataNum = 1;
 dataNum2 = 1;
 entry = 1;
 svgIntermediate = zeros(1,1);
+connectionArray = zeros(ySize,xSize,3,3);
 
 %search
 for y=1:ySize
     for x=1:xSize
         %tally adjancencies
         adj = -1;
+        %if not valid, -1
         if image(y,x)==1
             for j=-1:1
                 for i=-1:1
@@ -60,7 +50,7 @@ for y=1:ySize
                 end
             end
         end
-        
+                       
         %end points
         if adj==1 || 3<=adj
             for asdf=1:adj
@@ -81,15 +71,8 @@ for y=1:ySize
                         for i=-1:1
                             dupeFlag = false;
                             if bitmapPadded(y2+j+1,x2+i+1) == 1 && ~isequal([j,i],[0,0])
-                                for n=1:size(svgDataDense,2)
-                                    if svgDataDense(1,n)==x2 || svgDataDense(1,n)==x2+i
-                                        if svgDataDense(2,n)==y2 || svgDataDense(2,n)==y2+j
-                                            if isequal(svgDataDense(:,n),[x2;y2;x2+i;y2+j]) || isequal(svgDataDense(:,n),[x2+i;y2+j;x2;y2])
-                                                dupeFlag = true;
-                                                break
-                                            end
-                                        end
-                                    end
+                                if connectionArray(y2,x2,j+2,i+2) == 1 || connectionArray(y2+j,x2+i,-j+2,-i+2)==1
+                                    dupeFlag = true;
                                 end
 
                                 if dupeFlag == false
@@ -109,7 +92,10 @@ for y=1:ySize
                                     exFlag = false;
 
                                     svgDataDense(:,dataNum) = [x2;y2;x2+i;y2+j];
-
+                                    
+                                    connectionArray(y2,x2,j+2,i+2) = 1;
+                                    connectionArray(y2+j,x2+i,-j+2,-i+2) = 1;
+                                    
                                     firstFlag = false;
 
                                     dataNum = dataNum + 1;
